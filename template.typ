@@ -17,7 +17,7 @@
       it
     }
   }
-
+  
   // Title page.
   // The page can contain a logo if you pass one with `logo: "logo.png"`.
   v(0.6fr)
@@ -25,23 +25,19 @@
     align(right, image(logo, width: 26%))
   }
   v(9.6fr)
-
+  
   text(2em, weight: 700, title)
-
+  
   // Author information.
-  pad(
-    top: 0.7em,
-    right: 20%,
-    grid(
-      columns: (1fr,) * calc.min(3, authors.len()),
-      gutter: 1em,
-      ..authors.map(author => align(start, strong(author))),
-    ),
-  )
-
+  pad(top: 0.7em, right: 20%, grid(
+    columns: (1fr,) * calc.min(3, authors.len()),
+    gutter: 1em,
+    ..authors.map(author => align(start, strong(author))),
+  ))
+  
   v(2.4fr)
   pagebreak()
-
+  
   // Abstract page.
   if abstract != none {
     v(1fr)
@@ -51,18 +47,18 @@
     v(1.618fr)
     pagebreak()
   }
-
-
+  
+  
   // Table of contents.
   outline(depth: 2, indent: 1.5em)
   pagebreak()
-
-
+  
+  
   // Main body.
   set par(justify: true)
-
+  
   set page(numbering: "1", number-align: center)
   counter(page).update(1)
-
+  
   body
 }
