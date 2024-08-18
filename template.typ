@@ -1,4 +1,4 @@
-#let project(title: "", authors: (), logo: none, body) = {
+#let project(title: "", abstract: none, authors: (), logo: none, body) = {
   // Set the document's basic properties.
   set document(author: authors, title: title)
   set page(paper: "a5")
@@ -41,6 +41,16 @@
 
   v(2.4fr)
   pagebreak()
+
+  // Abstract page.
+  if abstract != none {
+    v(1fr)
+    align(center)[
+      #abstract
+    ]
+    v(1.618fr)
+    pagebreak()
+  }
 
 
   // Table of contents.
