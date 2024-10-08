@@ -1,5 +1,6 @@
 from ebooklib import epub
 import json
+from typst_parser import typst2xml
 
 def escape_xml_characters(input_string):
     escape_dict = {
@@ -41,6 +42,8 @@ for superchapter, chapters in data:
     super_sec = epub.Section(superchapter)
     local_chapters = []
     for cpt_name, cpt_body in chapters:
+        if str.startswith(cpt_name, "#[") and str.endswith(cpt_name, ']'):
+            cpt_name = typst2xml(cpt_name)
         chapter = epub.EpubHtml(
             title=cpt_name, file_name=f"chap_{len(total_chapters)}.xhtml", lang="zh"
         )
