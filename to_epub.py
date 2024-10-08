@@ -21,6 +21,11 @@ book.set_title("恐吓小说网")
 book.set_language("zh")
 book.add_author("幻影大厦")
 
+cover_image_path = 'cover.png'  # Change this to the path of your cover image
+with open(cover_image_path, 'rb') as img_file:
+    cover_image = img_file.read()
+book.set_cover("cover.png", cover_image)
+
 style = r'''
 @charset "utf-8";
 p {
@@ -51,9 +56,8 @@ for superchapter, chapters in data:
         total_chapters.append(chapter)
     toc.append([super_sec, local_chapters])
 
-book.toc = tuple(toc)
+book.toc = toc
 book.add_item(epub.EpubNcx())
-book.add_item(epub.EpubNav())
-book.spine = ["nav", *total_chapters]
+book.spine = total_chapters
 
 epub.write_epub("恐吓小说网-幻影大厦.epub", book, {})
