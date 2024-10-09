@@ -1,16 +1,6 @@
 from ebooklib import epub
 import json
-from typst_parser import typst2xml
-
-def escape_xml_characters(input_string):
-    escape_dict = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&apos;'
-    }
-    return ''.join(escape_dict.get(char, char) for char in input_string)
+from typst_parser import typst2xml, escape_xml_characters
 
 with open("./恐吓小说网-幻影大厦.json", "rb") as f:
     data = json.load(f)
