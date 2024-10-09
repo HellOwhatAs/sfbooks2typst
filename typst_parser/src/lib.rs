@@ -3,7 +3,7 @@ use lazy_static::lazy_static;
 use std::collections::HashMap;
 
 lazy_static! {
-    static ref FuncCall_RULES: HashMap<String, (String, String)> = {
+    static ref FuncCallRules: HashMap<String, (String, String)> = {
         maplit::hashmap! {
             "strike" => ("<del>", "</del>"),
             "highlight" => ("<mark>", "</mark>"),
@@ -11,6 +11,19 @@ lazy_static! {
             "sub" => ("<sub>", "</sub>"),
             "super" => ("<sup>", "</sup>"),
             "underline" => ("<span style=\"text-decoration:underline;\">", "</span>"),
+        }
+        .into_iter()
+        .map(|(k, (v1, v2))| (k.to_string(), (v1.to_string(), v2.to_string())))
+        .collect::<HashMap<_, _>>()
+    };
+    static ref FuncCallTextRules: HashMap<String, (String, String)> = {
+        maplit::hashmap! {
+            "strike" => ("", ""),
+            "highlight" => ("", ""),
+            "overline" => ("", ""),
+            "sub" => ("", ""),
+            "super" => ("", ""),
+            "underline" => ("", ""),
         }
         .into_iter()
         .map(|(k, (v1, v2))| (k.to_string(), (v1.to_string(), v2.to_string())))
@@ -43,7 +56,7 @@ pub fn escape_xml_characters(s: &str) -> String {
         .unwrap_or_else(|| String::new())
 }
 
-fn func(root: &typst_syntax::SyntaxNode, arr: &mut Vec<String>) {
+fn func(root: &typst_syntax::SyntaxNode, arr: &mut Vec<String>, rules: &HashMap<String, (String, String)>) {
     use typst_syntax::SyntaxKind::{FuncCall, Space, Str, Text};
     let s = root.text().to_string();
     match root.kind() {
@@ -51,9 +64,9 @@ fn func(root: &typst_syntax::SyntaxNode, arr: &mut Vec<String>) {
             let mut it = root.children();
             let func_name = it.next().unwrap();
             let func_args = it.next().unwrap();
-            if let Some((pre, post)) = FuncCall_RULES.get(func_name.text().as_str()) {
+            if let Some((pre, post)) = rules.get(func_name.text().as_str()) {
                 arr.push(pre.to_string());
-                func(func_args, arr);
+                func(func_args, arr, rules);
                 arr.push(post.to_string());
             }
             return;
@@ -69,7 +82,7 @@ fn func(root: &typst_syntax::SyntaxNode, arr: &mut Vec<String>) {
         _ => {}
     }
     for child in root.children() {
-        func(child, arr);
+        func(child, arr, rules);
     }
 }
 
@@ -78,7 +91,16 @@ fn func(root: &typst_syntax::SyntaxNode, arr: &mut Vec<String>) {
 pub fn typst2xml(src: String) -> PyResult<String> {
     let root: typst_syntax::SyntaxNode = typst_syntax::parse(&src);
     let mut arr = vec![];
-    func(&root, &mut arr);
+    func(&root, &mut arr, &FuncCallRules);
+    Ok(arr.join(""))
+}
+
+/// Convert typst code to text.
+#[pyfunction]
+pub fn typst2text(src: String) -> PyResult<String> {
+    let root: typst_syntax::SyntaxNode = typst_syntax::parse(&src);
+    let mut arr = vec![];
+    func(&root, &mut arr, &FuncCallTextRules);
     Ok(arr.join(""))
 }
 
@@ -87,5 +109,6 @@ pub fn typst2xml(src: String) -> PyResult<String> {
 fn typst_parser(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(escape_xml_characters, m)?)?;
     m.add_function(wrap_pyfunction!(typst2xml, m)?)?;
+    m.add_function(wrap_pyfunction!(typst2text, m)?)?;
     Ok(())
 }
