@@ -9,6 +9,7 @@
   abstract: "世上有三种人最惹不起，第一种是无欲无求的人，第二种是不怕死的人，第三种则是“恐吓小说网”的「作者」。 成为“恐吓小说网”的作者后，绪方周围越来越多地出现了怪异事件。",
 )
 
+#set line(length: 40%)
 #let parse-input(src) = if src.starts-with("#[") and src.ends-with("]") {
   eval(src, mode: "markup")
 } else { src }
