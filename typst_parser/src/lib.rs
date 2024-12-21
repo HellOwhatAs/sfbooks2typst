@@ -11,6 +11,7 @@ lazy_static! {
             "sub" => ("<sub>", "</sub>"),
             "super" => ("<sup>", "</sup>"),
             "underline" => ("<span style=\"text-decoration:underline;\">", "</span>"),
+            "line" => ("<span>—————————", "</span>"),
         }
         .into_iter()
         .map(|(k, (v1, v2))| (k.to_string(), (v1.to_string(), v2.to_string())))
