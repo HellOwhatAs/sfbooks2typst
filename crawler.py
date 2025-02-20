@@ -1,46 +1,68 @@
-from selenium.webdriver import Edge as Driver
-from selenium.webdriver.edge.service import Service
-from selenium.webdriver.common.by import By
-from webdriver_manager.microsoft import EdgeChromiumDriverManager as DriverManager
 import json
+import requests
+from fake_useragent import UserAgent
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+from tqdm import tqdm
 
-browser = Driver(service=Service(DriverManager().install()))
 
-browser.get("https://book.sfacg.com/Novel/110383/")
-author = browser.find_element(By.CSS_SELECTOR, "div.author-name").text
-browser.find_element(By.CSS_SELECTOR, "#BasicOperation > a:nth-child(1)").click()
-title = browser.find_element(By.CSS_SELECTOR, "h1.story-title").text
-
-outline = [
-    (
-        i.find_element(By.CSS_SELECTOR, ".catalog-title").text,
-        [
-            (j.text, j.get_attribute("href"), [])
-            for j in i.find_elements(By.CSS_SELECTOR, "div.catalog-list > ul > li > a")
-        ],
+def crawl_novel(novel_id: str = "110383"):
+    headers = {"User-Agent": UserAgent(platforms=["desktop"]).edge}
+    response = requests.get(
+        f"https://book.sfacg.com/Novel/{novel_id}/", headers=headers
     )
-    for i in browser.find_elements(By.CSS_SELECTOR, "div.story-catalog")
-]
+    soup = BeautifulSoup(response.content, "lxml")
+    author = str.strip(soup.select_one("div.author-name").text).replace("\xa0", " ")
 
-for catalog_name, catalog in outline:
-    for cpt_name, cpt_url, cpt_content in catalog:
-        browser.get(cpt_url)
-        cpt_content.clear()
-        cpt_content.extend(
-            p.text for p in browser.find_elements(By.CSS_SELECTOR, "#ChapterBody > p")
-        )
+    response = requests.get(
+        f"https://book.sfacg.com/Novel/{novel_id}/MainIndex/", headers=headers
+    )
+    soup = BeautifulSoup(response.content, "lxml")
+    title = str.strip(soup.select_one("h1.story-title").text).replace("\xa0", " ")
 
-browser.quit()
-with open(f"{title}-{author}.json", "w", encoding="utf-8") as f:
-    json.dump(
-        [
+    outline = [
+        (
+            str.strip(i.select_one(".catalog-title").text).replace("\xa0", " "),
             [
-                catalog_name.replace(f"【{title}】", "").strip(),
-                [(cpt_name, cpt_content) for cpt_name, _, cpt_content in catalog],
-            ]
-            for catalog_name, catalog in outline
-        ],
-        f,
-        indent=4,
-        ensure_ascii=False,
-    )
+                (str.strip(j.text).replace("\xa0", " "), j["href"], [])
+                for j in i.select("div.catalog-list > ul > li > a")
+            ],
+        )
+        for i in soup.select("div.story-catalog")
+    ]
+
+    pbar = tqdm(total=sum(len(i) for _, i in outline), desc=title)
+    for _, catalog in outline:
+        for cpt_name, cpt_url, cpt_content in catalog:
+            response = requests.get(
+                urljoin("https://book.sfacg.com/", cpt_url), headers=headers
+            )
+            soup = BeautifulSoup(response.content, "lxml")
+            cpt_content.clear()
+            cpt_content.extend(
+                str.strip(p.text).replace("\xa0", " ")
+                for p in soup.select("#ChapterBody > p")
+            )
+            pbar.set_postfix_str(cpt_name)
+            pbar.update()
+
+    outline = [
+        [
+            str.replace(catalog_name, f"【{title}】", "").strip(),
+            [(cpt_name, cpt_content) for cpt_name, _, cpt_content in catalog],
+        ]
+        for catalog_name, catalog in outline
+    ]
+
+    return title, author, outline
+
+
+if __name__ == "__main__":
+    title, author, outline = crawl_novel()
+    with open(f"{title}-{author}.json", "w", encoding="utf-8") as f:
+        json.dump(
+            outline,
+            f,
+            indent=4,
+            ensure_ascii=False,
+        )

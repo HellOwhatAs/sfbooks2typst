@@ -1,0 +1,18 @@
+[project]
+name = "sfbooks2typst"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "beautifulsoup4>=4.13.3",
+    "ebooklib>=0.18",
+    "fake-useragent>=2.0.0",
+    "lxml>=5.3.1",
+    "requests>=2.32.3",
+    "tqdm>=4.67.1",
+    "typst-parser",
+]
+
+[tool.uv.sources]
+typst-parser = { path = "./typst_parser/" }
