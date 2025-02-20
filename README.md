@@ -1,4 +1,5 @@
 # sfbooks2typst
+(or epub)
 
 ## Getting Started
 1. Install [Rust](https://www.rust-lang.org/), [uv](https://github.com/astral-sh/uv), and [typst](https://typst.app/).
