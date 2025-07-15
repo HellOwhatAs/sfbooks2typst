@@ -66,8 +66,13 @@ jobs:
       contents: write
     steps:
       - uses: actions/download-artifact@v4
+      - name: Rename
+        run: |
+          mv 'main/恐吓小说网-幻影大厦.epub' 'main/main.epub'
+          mv 'main/恐吓小说网-幻影大厦.pdf' 'main/main.pdf'
+          mv 'main/恐吓小说网-幻影大厦.json' 'main/main.json'
       # 使用 softprops/action-gh-release 来附加构建产物到当前 Release
       - name: Upload release assets
         uses: softprops/action-gh-release@v1
         with:
-          files: 'main/恐吓小说网-幻影大厦.*'
+          files: 'main/main.*'
