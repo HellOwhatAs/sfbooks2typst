@@ -10,6 +10,8 @@ permissions:
 jobs:
   build_sfbook:
     runs-on: ubuntu-latest
+    env:
+      LANG: zh_CN.UTF-8
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
@@ -19,8 +21,8 @@ jobs:
         with:
           python-version-file: "pyproject.toml"
 
-      - name: Crawler
-        run: uv run crawler.py
+      # - name: Crawler
+      #   run: uv run crawler.py
 
       - name: Build Epub
         run: uv run to_epub.py
@@ -37,6 +39,8 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    env:
+      LANG: zh_CN.UTF-8
     needs: [build_sfbook]
     permissions:
       # 用于签署构建产物
