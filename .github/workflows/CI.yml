@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build_sfbook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Crawler
+        run: uv run crawler.py
+
+      - name: Build Epub
+        run: uv run to_epub.py
+
+      - name: Build PDF
+        run: uv run to_pdf.py
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: main
+          path: '*-*.*'
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [build_sfbook]
+    permissions:
+      # 用于签署构建产物
+      id-token: write
+      # 用于上传 Release 附件
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+      # 使用 softprops/action-gh-release 来附加构建产物到当前 Release
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: 'main/*-*.*'

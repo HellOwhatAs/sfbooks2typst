@@ -14,6 +14,6 @@
    # output <title>-<author>.epub
    uv run to_epub.py
 
-   # compile to main.pdf
-   typst c main.typ
+   # compile to <title>-<author>.pdf
+   uv run to_pdf.py
    ```
