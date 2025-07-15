@@ -12,8 +12,24 @@ jobs:
     runs-on: ubuntu-latest
     env:
       LANG: zh_CN.UTF-8
+      LC_ALL: zh_CN.UTF-8
     steps:
       - uses: actions/checkout@v4
+
+      - name: 安装并生成 zh_CN.UTF-8
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y locales
+          sudo locale-gen zh_CN.UTF-8
+
+      - name: Install Chinese fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+      # （可选）刷新字体缓存
+      - name: Rebuild font cache
+        run: fc-cache -f -v
+
       - name: Install uv
         uses: astral-sh/setup-uv@v6
       - name: "Set up Python"
@@ -34,13 +50,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: main
-          path: '*-*.*'
+          path: '恐吓小说网-幻影大厦.*'
 
   release:
     name: Release
     runs-on: ubuntu-latest
     env:
       LANG: zh_CN.UTF-8
+      LC_ALL: zh_CN.UTF-8
     needs: [build_sfbook]
     permissions:
       # 用于签署构建产物
@@ -53,4 +70,4 @@ jobs:
       - name: Upload release assets
         uses: softprops/action-gh-release@v1
         with:
-          files: 'main/*-*.*'
+          files: 'main/恐吓小说网-幻影大厦.*'
