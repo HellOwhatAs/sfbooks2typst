@@ -37,8 +37,8 @@ jobs:
         with:
           python-version-file: "pyproject.toml"
 
-      # - name: Crawler
-      #   run: uv run crawler.py
+      - name: Crawler
+        run: uv run crawler.py
 
       - name: Build Epub
         run: uv run to_epub.py
