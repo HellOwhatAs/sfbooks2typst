@@ -26,6 +26,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y fonts-noto-cjk
+      - name: Install libxml2 and libxslt
+        run: sudo apt-get install libxml2-dev libxslt-dev
       # （可选）刷新字体缓存
       - name: Rebuild font cache
         run: fc-cache -f -v
